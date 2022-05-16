@@ -1,5 +1,5 @@
 import numpy as np
-from pygame.locals import *
+import pygame
 from copy import deepcopy
 from Environment import Event, Environment
 from NoDisplayGame import NoDisplayGame
@@ -15,12 +15,12 @@ class MCTSNode:
         self.children = []
         self.N = 0 # number of visits
         self.Q = 0 # reward sum
-        self.untried_actions = [Event(pygame.KEYDOWN, K_LEFT), Event(pygame.KEYDOWN, K_RIGHT),
-                                Event(pygame.KEYDOWN, K_UP), Event(pygame.KEYUP, K_LEFT),
-                                Event(pygame.KEYUP, K_RIGHT), Event(pygame.KEYUP, K_UP),
-                                Event(pygame.KEYDOWN, K_a), Event(pygame.KEYDOWN, K_d),
-                                Event(pygame.KEYDOWN, K_w), Event(pygame.KEYUP, K_a),
-                                Event(pygame.KEYUP, K_d), Event(pygame.KEYUP, K_w),
+        self.untried_actions = [Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_RIGHT),
+                                Event(pygame.KEYDOWN, pygame.K_UP), Event(pygame.KEYUP, pygame.K_LEFT),
+                                Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_UP),
+                                Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_d),
+                                Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_a),
+                                Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYUP, pygame.K_w),
                                 Event(None, None)]
         
     def expand(self):
@@ -86,7 +86,7 @@ class MCTSNode:
         
         return node
     
-    def best_action(self, num_simulations):
+    def best_action(self, num_simulations=100):
         for i in range(num_simulations):
             node = self.tree_policy()
             total_reward = node.rollout()

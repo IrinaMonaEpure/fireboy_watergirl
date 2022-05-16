@@ -1,8 +1,8 @@
 from NoDisplayGame import NoDisplayGame
 from NoDisplayBoard import NoDisplayBoard
 from NoDisplayGates import NoDisplayGates
-from MagmaBoy_and_HydroGirl_Game.doors import FireDoor, WaterDoor
-from MagmaBoy_and_HydroGirl_Game.character import MagmaBoy, HydroGirl
+from NoDisplayDoors import NoDisplayFireDoor, NoDisplayWaterDoor
+from NoDisplayCharacter import NoDisplayMagmaBoy, NoDisplayHydroGirl
 from MagmaBoy_and_HydroGirl_Game.controller import ArrowsController, WASDController
 
 # import pygame and orther needed libraries
@@ -41,48 +41,48 @@ class Environment:
             self.gates = [self.gate]
     
             self.fire_door_location = (64, 48)
-            self.fire_door = FireDoor(self.fire_door_location)
+            self.fire_door = NoDisplayFireDoor(self.fire_door_location)
             self.water_door_location = (128, 48)
-            self.water_door = WaterDoor(self.water_door_location)
+            self.water_door = NoDisplayWaterDoor(self.water_door_location)
             self.doors = [self.fire_door, self.water_door]
     
             self.magma_boy_location = (16, 336)
-            self.magma_boy = MagmaBoy(self.magma_boy_location)
+            self.magma_boy = NoDisplayMagmaBoy(self.magma_boy_location)
             self.hydro_girl_location = (35, 336)
-            self.hydro_girl = HydroGirl(self.hydro_girl_location)
+            self.hydro_girl = NoDisplayHydroGirl(self.hydro_girl_location)
     
         if self.level == "level2":
             self.board = NoDisplayBoard('MagmaBoy_and_HydroGirl_Game/data/level2.txt')
             self.gates = []
     
             self.fire_door_location = (390, 48)
-            self.fire_door = FireDoor(self.fire_door_location)
+            self.fire_door = NoDisplayFireDoor(self.fire_door_location)
             self.water_door_location = (330, 48)
-            self.water_door = WaterDoor(self.water_door_location)
+            self.water_door = NoDisplayWaterDoor(self.water_door_location)
             self.doors = [self.fire_door, self.water_door]
     
             self.magma_boy_location = (16, 336)
-            self.magma_boy = MagmaBoy(self.magma_boy_location)
+            self.magma_boy = NoDisplayMagmaBoy(self.magma_boy_location)
             self.hydro_girl_location = (35, 336)
-            self.hydro_girl = HydroGirl(self.hydro_girl_location)
+            self.hydro_girl = NoDisplayHydroGirl(self.hydro_girl_location)
     
         if self.level == "level3":
             self.board = NoDisplayBoard('MagmaBoy_and_HydroGirl_Game/data/level3.txt')
             self.gates = []
     
             self.fire_door_location = (5 * 16, 4 * 16)
-            self.fire_door = FireDoor(self.fire_door_location)
+            self.fire_door = NoDisplayFireDoor(self.fire_door_location)
             self.water_door_location = (28 * 16, 4 * 16)
-            self.water_door = WaterDoor(self.water_door_location)
+            self.water_door = NoDisplayWaterDoor(self.water_door_location)
             self.doors = [self.fire_door, self.water_door]
     
             self.magma_boy_location = (28 * 16, 4 * 16)
-            self.magma_boy = MagmaBoy(self.magma_boy_location)
+            self.magma_boy = NoDisplayMagmaBoy(self.magma_boy_location)
             self.hydro_girl_location = (5 * 16, 4 * 16)
-            self.hydro_girl = HydroGirl(self.hydro_girl_location)
+            self.hydro_girl = NoDisplayHydroGirl(self.hydro_girl_location)
             
-        return [[self.magma_boy.x, self.magma_boy.y],
-                [self.hydro_girl.x, self.hydro_girl.y]]
+        return [[self.magma_boy.rect.x, self.magma_boy.rect.y],
+                [self.hydro_girl.rect.x, self.hydro_girl.rect.y]]
     
     def step(self, action):        
         # initialize needed classes
@@ -94,8 +94,8 @@ class Environment:
         wasd_controller.control_player([action], self.hydro_girl)
     
         self.game.move_player(self.board, self.gates, [self.magma_boy, self.hydro_girl])
-        s_next = [[self.magma_boy.x, self.magma_boy.y],
-                  [self.hydro_girl.x, self.hydro_girl.y]]
+        s_next = [[self.magma_boy.rect.x, self.magma_boy.rect.y],
+                  [self.hydro_girl.rect.x, self.hydro_girl.rect.y]]
     
         # check for player at special location
         self.game.check_for_death(self.board, [self.magma_boy, self.hydro_girl])
@@ -128,3 +128,14 @@ class Environment:
             reward = 100
             
         return s_next, reward, done
+    
+
+def test():
+    env = Environment(NoDisplayGame(), "level1")
+    s_0 = env.reset()
+    for a in env.action_list:
+        s_next, r, done = env.step(a)
+        print("s_next: ", s_next, " r: ", r, " done: ", done)
+        
+if __name__ == "__main__":
+    test()
