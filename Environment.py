@@ -8,7 +8,6 @@ from MagmaBoy_and_HydroGirl_Game.controller import ArrowsController, WASDControl
 # import pygame and orther needed libraries
 import sys
 import pygame
-from pygame.locals import *
 
 
 class Event:
@@ -19,15 +18,14 @@ class Event:
 
 class Environment:
     def __init__(self, game, level):
-        self.game = game
         self.level = level
         self.n_states = (game.display_size[0] * game.display_size[1]) ** 2
-        self.action_list = [Event(pygame.KEYDOWN, K_LEFT), Event(pygame.KEYDOWN, K_RIGHT),
-                            Event(pygame.KEYDOWN, K_UP), Event(pygame.KEYUP, K_LEFT),
-                            Event(pygame.KEYUP, K_RIGHT), Event(pygame.KEYUP, K_UP),
-                            Event(pygame.KEYDOWN, K_a), Event(pygame.KEYDOWN, K_d),
-                            Event(pygame.KEYDOWN, K_w), Event(pygame.KEYUP, K_a),
-                            Event(pygame.KEYUP, K_d), Event(pygame.KEYUP, K_w),
+        self.action_list = [Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_RIGHT),
+                            Event(pygame.KEYDOWN, pygame.K_UP), Event(pygame.KEYUP, pygame.K_LEFT),
+                            Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_UP),
+                            Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_d),
+                            Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_a),
+                            Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYUP, pygame.K_w),
                             Event(None, None)]
         self.n_actions = len(self.action_list)
         
@@ -84,7 +82,7 @@ class Environment:
         return [[self.magma_boy.rect.x, self.magma_boy.rect.y],
                 [self.hydro_girl.rect.x, self.hydro_girl.rect.y]]
     
-    def step(self, action):        
+    def step(self, action, game):        
         # initialize needed classes
         arrows_controller = ArrowsController()
         wasd_controller = WASDController()
@@ -93,17 +91,17 @@ class Environment:
         arrows_controller.control_player([action], self.magma_boy)
         wasd_controller.control_player([action], self.hydro_girl)
     
-        self.game.move_player(self.board, self.gates, [self.magma_boy, self.hydro_girl])
+        game.move_player(self.board, self.gates, [self.magma_boy, self.hydro_girl])
         s_next = [[self.magma_boy.rect.x, self.magma_boy.rect.y],
                   [self.hydro_girl.rect.x, self.hydro_girl.rect.y]]
     
         # check for player at special location
-        self.game.check_for_death(self.board, [self.magma_boy, self.hydro_girl])
+        game.check_for_death(self.board, [self.magma_boy, self.hydro_girl])
     
-        self.game.check_for_gate_press(self.gates, [self.magma_boy, self.hydro_girl])
+        game.check_for_gate_press(self.gates, [self.magma_boy, self.hydro_girl])
     
-        self.game.check_for_door_open(self.fire_door, self.magma_boy)
-        self.game.check_for_door_open(self.water_door, self.hydro_girl)
+        game.check_for_door_open(self.fire_door, self.magma_boy)
+        game.check_for_door_open(self.water_door, self.hydro_girl)
             
         done = False
         reward = 1
@@ -123,7 +121,7 @@ class Environment:
             done = True
             reward = 0
         
-        if self.game.level_is_done(self.doors):
+        if game.level_is_done(self.doors):
             done = True
             reward = 100
             
@@ -131,10 +129,11 @@ class Environment:
     
 
 def test():
-    env = Environment(NoDisplayGame(), "level1")
+    game = NoDisplayGame()
+    env = Environment(game, "level1")
     s_0 = env.reset()
     for a in env.action_list:
-        s_next, r, done = env.step(a)
+        s_next, r, done = env.step(a, game)
         print("s_next: ", s_next, " r: ", r, " done: ", done)
         
 if __name__ == "__main__":

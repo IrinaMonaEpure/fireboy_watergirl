@@ -13,7 +13,7 @@ class NoDisplayGame(Game):
         """
         self.chunk_size = 16
         self.display_size = (34 * self.chunk_size, 25 * self.chunk_size)
-        self.display = pygame.Surface(self.display_size)
+        #self.display = pygame.Surface(self.display_size)
         
     def draw_level_screen(self, level_select):
         pass

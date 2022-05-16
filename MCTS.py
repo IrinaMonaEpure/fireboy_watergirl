@@ -6,8 +6,9 @@ from NoDisplayGame import NoDisplayGame
 
 
 class MCTSNode:
-    def __init__(self, env, state, parent=None, parent_action=None, done=False):
+    def __init__(self, env, game, state, parent=None, parent_action=None, done=False):
         self.env = env
+        self.game = game
         self.state = state
         self.parent = parent
         self.parent_action = parent_action
@@ -26,7 +27,7 @@ class MCTSNode:
     def expand(self):
         action = self.untried_actions.pop()
         _env = deepcopy(self.env)
-        s_next, reward, done = _env.step(action)
+        s_next, reward, done = _env.step(action, self.game)
         child = MCTSNode(_env, s_next, parent=self, parent_action=action, done=done)
         self.children.append(child)
         return child
@@ -35,17 +36,17 @@ class MCTSNode:
         _env = deepcopy(self.env)
         done = self.done
         total_reward = 0
-        possible_actions = [Event(pygame.KEYDOWN, K_LEFT), Event(pygame.KEYDOWN, K_RIGHT),
-                            Event(pygame.KEYDOWN, K_UP), Event(pygame.KEYUP, K_LEFT),
-                            Event(pygame.KEYUP, K_RIGHT), Event(pygame.KEYUP, K_UP),
-                            Event(pygame.KEYDOWN, K_a), Event(pygame.KEYDOWN, K_d),
-                            Event(pygame.KEYDOWN, K_w), Event(pygame.KEYUP, K_a),
-                            Event(pygame.KEYUP, K_d), Event(pygame.KEYUP, K_w),
+        possible_actions = [Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_RIGHT),
+                            Event(pygame.KEYDOWN, pygame.K_UP), Event(pygame.KEYUP, pygame.K_LEFT),
+                            Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_UP),
+                            Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_d),
+                            Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_a),
+                            Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYUP, pygame.K_w),
                             Event(None, None)]
 
         while not done:
             action = self.rollout_policy(possible_actions)
-            s_next, reward, done = _env.step(action)
+            s_next, reward, done = _env.step(action, self.game)
             total_reward += reward
             
         return total_reward
@@ -101,7 +102,7 @@ def test():
     game = NoDisplayGame()
     env = Environment(game, level)
     state = env.reset()
-    node = MCTSNode(env, state)
+    node = MCTSNode(env, game, state)
     i = 0
     
     while not node.done:
