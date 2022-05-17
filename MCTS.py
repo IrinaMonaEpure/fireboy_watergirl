@@ -26,14 +26,14 @@ class MCTSNode:
         
     def expand(self):
         action = self.untried_actions.pop()
-        _env = deepcopy(self.env)
+        _env = self.env.copy(self.game)
         s_next, reward, done = _env.step(action, self.game)
-        child = MCTSNode(_env, s_next, parent=self, parent_action=action, done=done)
+        child = MCTSNode(_env, self.game, s_next, parent=self, parent_action=action, done=done)
         self.children.append(child)
         return child
     
     def rollout(self):
-        _env = deepcopy(self.env)
+        _env = self.env.copy(self.game)
         done = self.done
         total_reward = 0
         possible_actions = [Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_RIGHT),
@@ -53,7 +53,7 @@ class MCTSNode:
     
     def rollout_policy(self, possible_actions):
         # random policy
-        return possible_actions(np.random.randint(len(possible_actions)))
+        return possible_actions[np.random.randint(len(possible_actions))]
     
     def backpropagate(self, total_reward):
         self.N += 1

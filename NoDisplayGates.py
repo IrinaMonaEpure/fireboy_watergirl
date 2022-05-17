@@ -22,3 +22,9 @@ class NoDisplayGates(Gates):
         # load plate image and make transparent
         self.plate_image = pygame.image.load('MagmaBoy_and_HydroGirl_Game/data/gates_and_plates/plate.png')
         self.plate_image.set_colorkey((255, 0, 255))
+        
+    def copy(self):
+        gate_copy = NoDisplayGates(self.gate_location, self.plate_locations)
+        gate_copy.plate_is_pressed = self.plate_is_pressed
+        gate_copy._gate_is_open = self._gate_is_open
+        return gate_copy

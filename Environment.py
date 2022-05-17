@@ -127,6 +127,24 @@ class Environment:
             
         return s_next, reward, done
     
+    def copy(self, game):
+        env_copy = Environment(game, self.level)
+        env_copy.reset()
+        
+        env_copy.gates = []
+        if len(self.gates) > 0:
+            for gate in self.gates:
+                env_copy.gates.append(gate.copy())
+    
+        env_copy.doors = []
+        for door in self.doors:
+            env_copy.doors.append(door.copy())
+            
+        env_copy.magma_boy = self.magma_boy.copy([self.magma_boy.rect.x, self.magma_boy.rect.y])
+        env_copy.hydro_girl = self.hydro_girl.copy([self.hydro_girl.rect.x, self.hydro_girl.rect.y])
+        
+        return env_copy
+    
 
 def test():
     game = NoDisplayGame()
