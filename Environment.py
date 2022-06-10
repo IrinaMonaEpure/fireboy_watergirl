@@ -138,6 +138,61 @@ class Environment:
 
         return s_next, reward, done
 
+    def multistep(self, action, game):
+        """Variant of step function that allows multiple actions to be performed at once."""
+
+        # initialize needed classes
+        arrows_controller = ArrowsController()
+        wasd_controller = WASDController()
+
+        # move player
+        arrows_controller.control_player(action, self.magma_boy)
+        wasd_controller.control_player(action, self.hydro_girl)
+
+        game.move_player(self.board, self.gates, [
+                         self.magma_boy, self.hydro_girl])
+
+        character_new_positions = [[self.magma_boy.rect.x, self.magma_boy.rect.y],
+                                   [self.hydro_girl.rect.x, self.hydro_girl.rect.y]]
+
+        # update frame
+        self.perform_frame_update()
+
+        s_next = self.states
+
+        # check for player at special location
+        game.check_for_death(self.board, [self.magma_boy, self.hydro_girl])
+
+        game.check_for_gate_press(
+            self.gates, [self.magma_boy, self.hydro_girl])
+
+        game.check_for_door_open(self.fire_door, self.magma_boy)
+        game.check_for_door_open(self.water_door, self.hydro_girl)
+
+        done = False
+        reward = 1
+
+        if len(self.gates) > 0:
+            for gate in self.gates:
+                if gate.plate_is_pressed:
+                    reward += 10
+
+        if self.fire_door.player_at_door:
+            reward += 10
+        if self.water_door.player_at_door:
+            reward += 10
+
+        # special events
+        if self.hydro_girl.is_dead() or self.magma_boy.is_dead():
+            done = True
+            reward = 0
+
+        if game.level_is_done(self.doors):
+            done = True
+            reward = 100
+
+        return s_next, reward, done
+
     def copy(self, game):
         env_copy = Environment(game, self.level)
         env_copy.reset()

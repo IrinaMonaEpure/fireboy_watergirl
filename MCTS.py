@@ -4,10 +4,12 @@ from copy import deepcopy
 #from Environment import Event, Environment
 from Environment_drl import Event, Environment_drl
 from NoDisplayGame import NoDisplayGame
+import matplotlib.pyplot as plt
+import pickle
 
 
 class MCTSNode:
-    def __init__(self, env, game, state, parent=None, parent_action=None, done=False):
+    def __init__(self, env, game, state, parent=None, parent_action=None, done=False, budget=10000):
         self.env = env
         self.game = game
         self.state = state
@@ -17,13 +19,19 @@ class MCTSNode:
         self.children = []
         self.N = 0  # number of visits
         self.Q = 0  # reward sum
-        """
+        self.budget = budget
+
         self.untried_actions = [Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_RIGHT),
-                                Event(pygame.KEYDOWN, pygame.K_UP), Event(pygame.KEYUP, pygame.K_LEFT),
-                                Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_UP),
-                                Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_d),
-                                Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_a),
-                                Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYUP, pygame.K_w),
+                                Event(pygame.KEYDOWN, pygame.K_UP), Event(
+                                    pygame.KEYUP, pygame.K_LEFT),
+                                Event(pygame.KEYUP, pygame.K_RIGHT), Event(
+                                    pygame.KEYUP, pygame.K_UP),
+                                Event(pygame.KEYDOWN, pygame.K_a), Event(
+                                    pygame.KEYDOWN, pygame.K_d),
+                                Event(pygame.KEYDOWN, pygame.K_w), Event(
+                                    pygame.KEYUP, pygame.K_a),
+                                Event(pygame.KEYUP, pygame.K_d), Event(
+                                    pygame.KEYUP, pygame.K_w),
                                 Event(None, None)]
         """
         self.untried_actions = [[Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT)],  # Fire Boy move left
@@ -40,11 +48,13 @@ class MCTSNode:
                                 [Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_w), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(
                                     pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a)],  # Water Girl jump left
                                 [Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_w), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d)]]  # Water Girl jump right
+    """
 
     def expand(self):
+        self.budget -= 1
         action = self.untried_actions.pop()
         _env = self.env.copy(self.game)
-        s_next, reward, done = _env.multistep(action, self.game)
+        s_next, reward, done = _env.step(action, self.game)
         child = MCTSNode(_env, self.game, s_next, parent=self,
                          parent_action=action, done=done)
         self.children.append(child)
@@ -55,7 +65,7 @@ class MCTSNode:
         _env = self.env.copy(self.game)
         done = self.done
         total_reward = 0
-        """
+
         possible_actions = [Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_RIGHT),
                             Event(pygame.KEYDOWN, pygame.K_UP), Event(
                                 pygame.KEYUP, pygame.K_LEFT),
@@ -68,7 +78,7 @@ class MCTSNode:
                             Event(pygame.KEYUP, pygame.K_d), Event(
                                 pygame.KEYUP, pygame.K_w),
                             Event(None, None)]
-        
+        """
         possible_actions = [[Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT)],  # Fire Boy move left
                             [Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(
                                 pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT)],  # Fire Boy move right
@@ -83,7 +93,7 @@ class MCTSNode:
                             [Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_w), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(
                                 pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a)],  # Water Girl jump left
                             [Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_w), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d)]]  # Water Girl jump right
-        """
+        
         possible_actions = [[Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT), Event(pygame.KEYDOWN, pygame.K_LEFT), Event(pygame.KEYUP, pygame.K_LEFT)],  # Fire Boy move left
                             [Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(
                                 pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT), Event(pygame.KEYDOWN, pygame.K_RIGHT), Event(pygame.KEYUP, pygame.K_RIGHT)],  # Fire Boy move right
@@ -98,11 +108,15 @@ class MCTSNode:
                             [Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_w), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(
                                 pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a), Event(pygame.KEYDOWN, pygame.K_a), Event(pygame.KEYUP, pygame.K_a)],  # Water Girl jump left
                             [Event(pygame.KEYDOWN, pygame.K_w), Event(pygame.KEYUP, pygame.K_w), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d), Event(pygame.KEYDOWN, pygame.K_d), Event(pygame.KEYUP, pygame.K_d)]]  # Water Girl jump right
-
+        """
         while not done:
-            action = self.rollout_policy(possible_actions)
-            s_next, reward, done = _env.multistep(action, self.game)
-            total_reward += reward
+            if self.budget > 0:
+                self.budget -= 1
+                action = self.rollout_policy(possible_actions)
+                s_next, reward, done = _env.step(action, self.game)
+                total_reward += reward
+            else:
+                break
 
         print("Total reward of rollout: ", total_reward)
         return total_reward
@@ -145,10 +159,14 @@ class MCTSNode:
         node = self
 
         if not node.done:
-            if not node.is_fully_expanded():
+            if not node.is_fully_expanded() and self.budget > 0:
+                self.budget -= 1
                 return node.expand()
             else:
-                node = node.best_child()
+                try:
+                    node = node.best_child()
+                except:
+                    return node
 
         print("Tree policy returned: ", node)
         return node
@@ -167,7 +185,7 @@ class MCTSNode:
 
 def test():
     level = "level1"
-    num_simulations = 1
+    num_simulations = 2
     game = NoDisplayGame()
     env = Environment_drl(game, level)
     s = env.reset()
@@ -179,12 +197,18 @@ def test():
         i += 1
         s = s.reshape(400, 544, 1)
         frame_list.append(s)
+        plt.imshow(s)
+        plt.show()
         node = node.best_action(num_simulations=num_simulations)
         a = node.parent_action
-        s_next, r, done = env.multistep(a, game)
+        s_next, r, done = env.step(a, game)
         s = s_next
 
     print("Game ended in ", i, "moves.")
+    file = open(
+        r"C:/Users/irina/Documents/LU/MGAIA/Project/frames/frames_list.pckl", 'wb')
+    pickle.dump(frame_list, file)
+    file.close()
 
 
 if __name__ == '__main__':

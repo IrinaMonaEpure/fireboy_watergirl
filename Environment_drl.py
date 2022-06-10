@@ -194,17 +194,17 @@ class Environment_drl:
         game.check_for_door_open(self.water_door, self.hydro_girl)
 
         done = False
-        reward = 1
+        reward = -1
 
         if len(self.gates) > 0:
             for gate in self.gates:
                 if gate.plate_is_pressed:
-                    reward += 10
+                    reward += 100
 
         if self.fire_door.player_at_door:
-            reward += 10
+            reward += 100
         if self.water_door.player_at_door:
-            reward += 10
+            reward += 100
 
         # special events
         if self.hydro_girl.is_dead() or self.magma_boy.is_dead():
