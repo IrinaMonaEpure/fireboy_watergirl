@@ -13,6 +13,7 @@ class Event:
         self.type = _type
         self.key = key
 
+
 class DRL_Agent():
     def __init__(self, env, states_shape, learning_rate, epsilon, gamma, optimizer):
         self.env = env
@@ -89,7 +90,6 @@ class DRL_Agent():
         print('==== take predicted action ====')
         return self.action_sets[np.argmax(q_values[0])]
 
-
     def train_model(self, batch_size):
         memory_batch = random.sample(self.replay_memory, batch_size)
 
@@ -119,11 +119,12 @@ class DRL_Agent():
             if done_list[i]:
                 target[i][action_indexes[i]] = rewards[i]
             else:
-                target[i][action_indexes[i]] = rewards[i] + self.gamma*(np.amax(target_next[i]))
+                target[i][action_indexes[i]] = rewards[i] + \
+                    self.gamma*(np.amax(target_next[i]))
 
         self.model.fit(states_sets, target, batch_size = batch_size, verbose = 0)
 
-    def save_model(self,name):
+    def save_model(self, name):
         self.model.save(name)
 
 
@@ -292,6 +293,7 @@ def dqn_testing(trained_weights):
     return [frames_list, reward_per_ep]
 
 
+
 if __name__ == '__main__':
     [trained_weights,frames_list_training, reward_per_ep_training] = dqn_learning()
 
@@ -318,4 +320,3 @@ if __name__ == '__main__':
     file = open(r"./reward_per_ep_testing.pckl", 'wb')
     pickle.dump(reward_per_ep_testing, file)
     file.close()
-
